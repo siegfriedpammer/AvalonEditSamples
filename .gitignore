@@ -1,0 +1,4 @@
+# ignore all obj and bin folders (even in subdirectories)
+obj/
+bin/
+AvalonEdit.5.0.2
