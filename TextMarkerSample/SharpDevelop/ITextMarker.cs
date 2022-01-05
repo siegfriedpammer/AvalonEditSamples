@@ -98,8 +98,14 @@ namespace ICSharpCode.SharpDevelop.Editor
 		/// </summary>
 		/// <remarks>Not supported in this sample!</remarks>
 		object ToolTip { get; set; }
+
+		/// <summary>
+		/// Gets/sets if this marker will remove itself from the owning collection if it's <see cref="Length"/> changes to zero.
+		/// </summary>
+		bool RemoveZeroLength { get; set; }
+
 	}
-	
+
 	[Flags]
 	public enum TextMarkerTypes
 	{

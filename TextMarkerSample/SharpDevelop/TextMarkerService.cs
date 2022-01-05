@@ -35,14 +35,16 @@ namespace ICSharpCode.AvalonEdit.AddIn
 	public sealed class TextMarkerService : DocumentColorizingTransformer, IBackgroundRenderer, ITextMarkerService, ITextViewConnect
 	{
 		TextSegmentCollection<TextMarker> markers;
-		TextDocument document;
-		
-		public TextMarkerService(TextDocument document)
+		internal TextDocument document;
+        internal Dispatcher dispatcher;
+
+        public TextMarkerService(TextDocument document, Dispatcher dispatcher)
 		{
 			if (document == null)
 				throw new ArgumentNullException("document");
 			this.document = document;
-			this.markers = new TextSegmentCollection<TextMarker>(document);
+            this.dispatcher = dispatcher;
+            this.markers = new TextSegmentCollection<TextMarker>(document);
 		}
 		
 		#region ITextMarkerService
@@ -254,13 +256,13 @@ namespace ICSharpCode.AvalonEdit.AddIn
 	public sealed class TextMarker : TextSegment, ITextMarker
 	{
 		readonly TextMarkerService service;
-		
-		public TextMarker(TextMarkerService service, int startOffset, int length)
+
+        public TextMarker(TextMarkerService service, int startOffset, int length)
 		{
 			if (service == null)
 				throw new ArgumentNullException("service");
 			this.service = service;
-			this.StartOffset = startOffset;
+            this.StartOffset = startOffset;
 			this.Length = length;
 			this.markerTypes = TextMarkerTypes.None;
 		}
@@ -287,6 +289,8 @@ namespace ICSharpCode.AvalonEdit.AddIn
 			service.Redraw(this);
 		}
 		
+		public bool RemoveZeroLength { get; set; }
+
 		Color? backgroundColor;
 		
 		public Color? BackgroundColor {
@@ -362,5 +366,20 @@ namespace ICSharpCode.AvalonEdit.AddIn
 		}
 		
 		public object ToolTip { get; set; }
-	}
+
+        protected override void OnSegmentChanged() {
+            base.OnSegmentChanged();
+			if (RemoveZeroLength && Length == 0) {
+				RemoveSelf();
+            }
+        }
+
+        private void RemoveSelf() {
+            if (service.document.IsInUpdate) {
+				service.dispatcher.BeginInvoke((Action)RemoveSelf, DispatcherPriority.Normal);
+            }
+
+			service.Remove(this);
+        }
+    }
 }
