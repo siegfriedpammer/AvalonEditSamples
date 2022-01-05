@@ -40,7 +40,7 @@ namespace TextMarkerSample
 		
 		void InitializeTextMarkerService()
 		{
-			var textMarkerService = new TextMarkerService(textEditor.Document);
+			var textMarkerService = new TextMarkerService(textEditor.Document, textEditor.Dispatcher);
 			textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
 			textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
 			IServiceContainer services = (IServiceContainer)textEditor.Document.ServiceProvider.GetService(typeof(IServiceContainer));
@@ -64,6 +64,7 @@ namespace TextMarkerSample
 			ITextMarker marker = textMarkerService.Create(textEditor.SelectionStart, textEditor.SelectionLength);
 			marker.MarkerTypes = TextMarkerTypes.SquigglyUnderline;
 			marker.MarkerColor = Colors.Red;
+			marker.RemoveZeroLength = true;
 		}
 		
 		bool IsSelected(ITextMarker marker)
